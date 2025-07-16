@@ -7,7 +7,7 @@ class PostgreSQLDatabase {
   constructor() {
     this.pool = new Pool({
       host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
+      port: parseInt(process.env.DB_PORT || '5433'),
       database: process.env.DB_NAME || 'fruit_management',
       user: process.env.DB_USER || 'admin',
       password: process.env.DB_PASSWORD || 'admin123',
@@ -131,50 +131,77 @@ class PostgreSQLDatabase {
     }
   }
 
-  async updateFruit(id: string, updates: Partial<FruitRecord>): Promise<FruitRecord | null> {
-    const client = await this.pool.connect();
-    try {
-      const setClause = [];
-      const values = [];
-      let paramIndex = 1;
-
-      Object.entries(updates).forEach(([key, value]) => {
-        if (key !== 'id' && key !== 'createdAt' && key !== 'updatedAt' && value !== undefined) {
-          const dbKey = key === 'productName' ? 'product_name' : key;
-          setClause.push(`${dbKey} = $${paramIndex}`);
-          values.push(value);
-          paramIndex++;
-        }
-      });
-
-      if (updates.amount !== undefined || updates.unit !== undefined) {
-        setClause.push(`total = amount * unit`);
-      }
-
-      const query = `
-        UPDATE fruits 
-        SET ${setClause.join(', ')}
-        WHERE id = $${paramIndex}
-        RETURNING 
-          id,
-          date,
-          product_name as "productName",
-          color,
-          amount,
-          unit,
-          total,
-          created_at as "createdAt",
-          updated_at as "updatedAt"
-      `;
-      
-      values.push(id);
-      const result = await client.query(query, values);
-      
-      return result.rows[0] || null;
-    } finally {
-      client.release();
+    async updateFruit(id: string, updates: Partial<FruitRecord>): Promise<FruitRecord | null> {
+  const client = await this.pool.connect();
+  try {
+    // Step 1: ดึงข้อมูลปัจจุบัน
+    const currentResult = await client.query(
+      'SELECT amount, unit FROM fruits WHERE id = $1',
+      [id]
+    );
+    
+    if (currentResult.rows.length === 0) {
+      return null;
     }
+    
+    const currentData = currentResult.rows[0];
+    
+    // Step 2: คำนวณค่าใหม่
+    const newAmount = updates.amount !== undefined ? updates.amount : currentData.amount;
+    const newUnit = updates.unit !== undefined ? updates.unit : currentData.unit;
+    const newTotal = newAmount * newUnit;
+    
+    // Step 3: เตรียม SQL สำหรับ update
+    const setClause = [];
+    const values = [];
+    let paramIndex = 1;
+
+    // เพิ่มฟิลด์ที่ต้องการอัปเดต
+    Object.entries(updates).forEach(([key, value]) => {
+      if (key !== 'id' && key !== 'createdAt' && key !== 'updatedAt' && key !== 'total' && value !== undefined) {
+        const dbKey = key === 'productName' ? 'product_name' : key;
+        setClause.push(`${dbKey} = $${paramIndex}`);
+        values.push(value);
+        paramIndex++;
+      }
+    });
+
+    // เพิ่ม total ที่คำนวณใหม่
+    setClause.push(`total = $${paramIndex}`);
+    values.push(newTotal);
+    paramIndex++;
+
+    // เพิ่ม updated_at
+    setClause.push(`updated_at = CURRENT_TIMESTAMP`);
+
+    // Step 4: Execute update
+    const query = `
+      UPDATE fruits 
+      SET ${setClause.join(', ')}
+      WHERE id = $${paramIndex}
+      RETURNING 
+        id,
+        date,
+        product_name as "productName",
+        color,
+        amount,
+        unit,
+        total,
+        created_at as "createdAt",
+        updated_at as "updatedAt"
+    `;
+    
+    values.push(id);
+    console.log('🔧 Update Query:', query);
+    console.log('🔧 Update Values:', values);
+    
+    const result = await client.query(query, values);
+    
+    return result.rows[0] || null;
+  } finally {
+    client.release();
   }
+}
 
     async deleteFruit(id: string): Promise<boolean> {
       const client = await this.pool.connect();
