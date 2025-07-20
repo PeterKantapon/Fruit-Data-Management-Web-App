@@ -59,10 +59,10 @@ export class FruitService {
       throw new Error(`Invalid fruit: ${fruit.productName}. Valid fruits: ${this.validFruits.join(', ')}`);
     }
 
-    if (fruit.productName && fruit.color && 
-        !this.fruitColors[fruit.productName]?.includes(fruit.color)) {
-      throw new Error(`Invalid color ${fruit.color} for fruit ${fruit.productName}. Valid colors: ${this.fruitColors[fruit.productName]?.join(', ')}`);
-    }
+    // if (fruit.productName && fruit.color && 
+    //     !this.fruitColors[fruit.productName]?.includes(fruit.color)) {
+    //   throw new Error(`Invalid color ${fruit.color} for fruit ${fruit.productName}. Valid colors: ${this.fruitColors[fruit.productName]?.join(', ')}`);
+    // }
 
     if (fruit.amount && fruit.amount <= 0) {
       throw new Error('Amount must be greater than 0');
@@ -72,9 +72,9 @@ export class FruitService {
       throw new Error('Unit must be greater than 0');
     }
 
-    if (fruit.date && !this.isValidDate(fruit.date)) {
-      throw new Error('Invalid date format. Use YYYY-MM-DD');
-    }
+    // if (fruit.date && !this.isValidDate(fruit.date)) {
+    //   throw new Error('Invalid date format. Use DD-MM-YYYY');
+    // }
   }
 
   private isValidDate(dateString: string): boolean {
