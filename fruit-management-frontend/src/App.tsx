@@ -79,6 +79,11 @@ function App() {
     },
     content: {
       padding: '2rem',
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: '2rem', // เพิ่มระยะห่างระหว่าง components
+      maxWidth: '1400px', // จำกัดความกว้างไม่ให้กว้างเกินไป
+      margin: '0 auto', // center content
     },
     loading: {
       textAlign: 'center' as const,
@@ -117,14 +122,13 @@ function App() {
           </button>
         </div>
       </header>
-
       <main style={styles.content}>
-        <CSVUpload onUploadComplete={handleSave} />
         <DataGrid
           onEdit={handleEdit}
           onDelete={handleDelete}
           refresh={refreshGrid}
         />
+        <CSVUpload onUploadComplete={handleSave} />
       </main>
       <AddRecordModal
         isOpen={isModalOpen}

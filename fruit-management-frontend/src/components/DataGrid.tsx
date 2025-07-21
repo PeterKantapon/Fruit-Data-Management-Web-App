@@ -69,6 +69,35 @@ const DataGrid: React.FC<DataGridProps> = ({ onEdit, onDelete, refresh }) => {
     }
   };
 
+  const getPaginationNumbers = () => {
+    if (!data) return [];
+    
+    const current = data.page;
+    const total = data.totalPages;
+    const numbers = [];
+    
+    if (total <= 7) {
+      // ถ้าหน้าไม่เกิน 7 แสดงทั้งหมด
+      for (let i = 1; i <= total; i++) {
+        numbers.push(i);
+      }
+    } else {
+      // ถ้าหน้าเกิน 7 ใช้ logic แสดงแค่บางส่วน
+      if (current <= 4) {
+        // อยู่หน้าแรกๆ: 1 2 3 4 5 ... 40
+        numbers.push(1, 2, 3, 4, 5, '...', total);
+      } else if (current >= total - 3) {
+        // อยู่หน้าสุดท้าย: 1 ... 36 37 38 39 40
+        numbers.push(1, '...', total - 4, total - 3, total - 2, total - 1, total);
+      } else {
+        // อยู่ตรงกลาง: 1 ... 8 9 10 11 12 ... 40
+        numbers.push(1, '...', current - 2, current - 1, current, current + 1, current + 2, '...', total);
+      }
+    }
+    
+    return numbers;
+  };
+
   const styles = {
     container: {
       backgroundColor: 'white',
@@ -150,19 +179,36 @@ const DataGrid: React.FC<DataGridProps> = ({ onEdit, onDelete, refresh }) => {
       justifyContent: 'space-between',
       alignItems: 'center',
       borderTop: '1px solid #e5e7eb',
+      flexWrap: 'wrap' as const,
+      gap: '0.5rem',
     },
     pageBtn: {
       padding: '0.5rem 0.75rem',
-      margin: '0 0.25rem',
+      margin: '0 0.125rem',
       border: '1px solid #d1d5db',
       borderRadius: '4px',
       backgroundColor: 'white',
       cursor: 'pointer',
+      fontSize: '0.875rem',
+      minWidth: '2.5rem',
+      textAlign: 'center' as const,
+      transition: 'all 0.2s',
+      ':hover': {
+        backgroundColor: '#f3f4f6',
+        borderColor: '#9ca3af',
+      },
     },
     currentPageBtn: {
       backgroundColor: '#3b82f6',
       color: 'white',
       border: '1px solid #3b82f6',
+      fontWeight: 'bold',
+    },
+    disabledPageBtn: {
+      backgroundColor: '#f3f4f6',
+      color: '#9ca3af',
+      cursor: 'not-allowed',
+      border: '1px solid #e5e7eb',
     },
     loading: {
       textAlign: 'center' as const,
@@ -286,34 +332,62 @@ const DataGrid: React.FC<DataGridProps> = ({ onEdit, onDelete, refresh }) => {
       {data && data.totalPages > 1 && (
         <div style={styles.pagination}>
           <div>
-            Page {data.page} of {data.totalPages}
+            Page {data.page} of {data.totalPages} ({data.total} total records)
           </div>
           <div>
+            {/* First & Previous buttons */}
+            <button
+              style={styles.pageBtn}
+              onClick={() => setPage(1)}
+              disabled={page <= 1}
+            >
+              ≪ First
+            </button>
             <button
               style={styles.pageBtn}
               onClick={() => setPage(page - 1)}
               disabled={page <= 1}
             >
-              Previous
+              ‹ Previous
             </button>
-            {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((pageNum) => (
-              <button
-                key={pageNum}
-                style={{
-                  ...styles.pageBtn,
-                  ...(pageNum === page ? styles.currentPageBtn : {}),
-                }}
-                onClick={() => setPage(pageNum)}
-              >
-                {pageNum}
-              </button>
+            
+            {/* Page numbers */}
+            {getPaginationNumbers().map((pageNum, index) => (
+              pageNum === '...' ? (
+                <span key={index} style={{ padding: '0.5rem', color: '#6b7280' }}>
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={pageNum}
+                  style={{
+                    ...styles.pageBtn,
+                    ...(pageNum === page ? styles.currentPageBtn : {}),
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault(); // ป้องกัน default behavior
+                    setPage(Number(pageNum));
+                  }}
+                >
+                  {pageNum}
+                </button>
+              )
             ))}
+            
+            {/* Next & Last buttons */}
             <button
               style={styles.pageBtn}
               onClick={() => setPage(page + 1)}
               disabled={page >= data.totalPages}
             >
-              Next
+              Next ›
+            </button>
+            <button
+              style={styles.pageBtn}
+              onClick={() => setPage(data.totalPages)}
+              disabled={page >= data.totalPages}
+            >
+              Last ≫
             </button>
           </div>
         </div>
