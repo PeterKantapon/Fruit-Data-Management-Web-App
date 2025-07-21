@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import database from './utils/database';
 import authRoutes from './routes/auth';
 import fruitRoutes from './routes/fruits';
+import csvRoutes from './routes/csv';
 
 // Load environment variables
 dotenv.config();
@@ -29,6 +30,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/fruits', fruitRoutes);
+app.use('/api/csv', csvRoutes);
 
 // Health check endpoint
 app.get('/health', async (req, res) => {

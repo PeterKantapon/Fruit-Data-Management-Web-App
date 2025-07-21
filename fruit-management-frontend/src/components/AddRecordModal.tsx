@@ -287,20 +287,34 @@ const AddRecordModal: React.FC<AddRecordModalProps> = ({
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>Product Name</label>
-            <select
-              value={formData.productName}
-              onChange={(e) => handleFruitChange(e.target.value)}
-              style={styles.select}
-              required
-              disabled={!!editingFruit}
-            >
-              <option value="">Select a fruit</option>
-              {validFruits.map((fruit) => (
-                <option key={fruit} value={fruit}>
-                  {fruit}
-                </option>
-              ))}
-            </select>
+            {editingFruit ? (
+              // Edit mode - แสดงเป็น text box สวยงาม
+              <div style={{
+                ...styles.input,
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                display: 'flex',
+                alignItems: 'center',
+                fontWeight: '500',
+              }}>
+                {formData.productName}
+              </div>
+            ) : (
+              // Add mode - แสดงเป็น dropdown
+              <select
+                value={formData.productName}
+                onChange={(e) => handleFruitChange(e.target.value)}
+                style={styles.select}
+                required
+              >
+                <option value="">Select a fruit</option>
+                {validFruits.map((fruit) => (
+                  <option key={fruit} value={fruit}>
+                    {fruit}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div style={styles.inputGroup}>

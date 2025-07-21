@@ -4,6 +4,7 @@ import LoginForm from './components/LoginForm';
 import DataGrid from './components/DataGrid';
 import AddRecordModal from './components/AddRecordModal';
 import { FruitRecord } from './types';
+import CSVUpload from './components/CSVUpload';
 
 function App() {
   const { user, isAuthenticated, login, logout, loading } = useAuth();
@@ -116,15 +117,15 @@ function App() {
           </button>
         </div>
       </header>
-      
+
       <main style={styles.content}>
+        <CSVUpload onUploadComplete={handleSave} />
         <DataGrid
           onEdit={handleEdit}
           onDelete={handleDelete}
           refresh={refreshGrid}
         />
       </main>
-
       <AddRecordModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
