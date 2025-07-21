@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: fruit_postgres_dev
+    environment:
+      POSTGRES_DB: fruit_management
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./database_setup.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d fruit_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API
+  fruit-management-backend:
+    build:
+      context: ./fruit-management-backend
+      dockerfile: Dockerfile
+    container_name: fruit_backend_dev
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: fruit_management
+      DB_USER: admin
+      DB_PASSWORD: admin123
+      JWT_SECRET: your-super-secret-jwt-key-for-development
+      PORT: 3001
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./fruit-management-backend:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    command: sh -c "npm run dev"
+
+  # Frontend React App
+  fruit-management-frontend:
+    build:
+      context: ./fruit-management-frontend
+      dockerfile: Dockerfile
+    container_name: fruit_frontend_dev
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001/api
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_HOST=localhost
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./fruit-management-frontend:/app
+      - /app/node_modules
+    depends_on:
+      - fruit-management-backend
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+volumes:
+  postgres_dev_data:

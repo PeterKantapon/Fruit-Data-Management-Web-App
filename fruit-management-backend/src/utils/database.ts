@@ -34,7 +34,7 @@ export class PostgreSQLDatabase {
     const client = await this.pool.connect();
     try {
       const result = await client.query(
-        'SELECT id, username, password_hash as password, created_at as "createdAt" FROM users WHERE username = $1',
+        'SELECT id, username, password, created_at as "createdAt" FROM users WHERE username = $1',
         [username]
       );
       return result.rows[0] || null;
