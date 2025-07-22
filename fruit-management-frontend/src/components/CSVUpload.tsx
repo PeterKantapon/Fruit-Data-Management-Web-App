@@ -171,7 +171,7 @@ const CSVUpload: React.FC<CSVUploadProps> = ({ onUploadComplete }) => {
           {uploading ? '⏳ Processing...' : '📤 Upload & Import'}
         </button>
         
-        <button
+        {/* <button
           onClick={handleClearAll}
           disabled={uploading}
           style={{
@@ -180,7 +180,7 @@ const CSVUpload: React.FC<CSVUploadProps> = ({ onUploadComplete }) => {
           }}
         >
           🗑️ Clear All Data
-        </button>
+        </button> */}
       </div>
 
       {result && (
