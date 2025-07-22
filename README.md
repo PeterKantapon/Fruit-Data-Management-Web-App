@@ -6,7 +6,7 @@ Node.js (v16 หรือสูงกว่า) - Download
 Docker Desktop - Download
 Git - Download
 
-#🚀 Quick Start (One-Click Setup)
+# 🚀 Quick Start (One-Click Setup)
 ## 1. Clone repository
 git clone https://github.com/PeterKantapon/Fruit-Data-Management-Web-App.git
 cd Fruit-Data-Management-Web-App
