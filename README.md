@@ -8,8 +8,8 @@ Git - Download
 
 #🚀 Quick Start (One-Click Setup)
 ## 1. Clone repository
-git clone https://github.com/yourusername/fruit-management-system.git
-cd fruit-management-system
+git clone https://github.com/PeterKantapon/Fruit-Data-Management-Web-App.git
+cd Fruit-Data-Management-Web-App
 
 ## 2. Start development environment (One-click!)
 ### Windows:
